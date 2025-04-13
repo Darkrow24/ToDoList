@@ -42,14 +42,9 @@ namespace ToDoList.Controllers
         {
             if (toDoItem == null)
             {
-                return BadRequest("Invalid ToDoItem data.");
+                return BadRequest("Geçersiz ToDoItem verileri");
             }
-
-            // Check if an item with the same Id already exists
-            if (toDoItems.Any(i => i.Id == toDoItem.Id))
-            {
-                return BadRequest($"An item with Id {toDoItem.Id} already exists.");
-            }
+            toDoItem.Id = toDoItems.Count > 0 ? toDoItems.Max(i => i.Id) + 1 : 1;
 
             toDoItem.CreatedAt = DateTime.Now;
             toDoItem.UpdatedAt = DateTime.Now;
@@ -74,7 +69,7 @@ namespace ToDoList.Controllers
             item.Description = updatedItem.Description;
             item.IsCompleted = updatedItem.IsCompleted;
             item.UpdatedAt = DateTime.Now;
-            return NoContent();
+            return Ok("Yapılacaklar listesi güncellenmiştir.");
         }
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
@@ -87,6 +82,56 @@ namespace ToDoList.Controllers
             toDoItems.Remove(item);
             return NoContent();
         }
+
+        [HttpGet("completed")]
+        public IActionResult GetCompleted()
+        {
+            var completedItems = toDoItems.Where(i => i.IsCompleted).ToList();
+            return Ok(completedItems);
+        }
+        
+        [HttpGet("incompleted")]
+        public IActionResult GetIncompleted()
+        {
+            var incompletedItems = toDoItems.Where(i => !i.IsCompleted).ToList();
+            return Ok(incompletedItems);
+        }
+
+        [HttpPut("complete/{id}")]
+        public IActionResult MarkAsCompleted(int id)
+        {
+            var item = toDoItems.FirstOrDefault(i => i.Id == id);
+            if (item == null)
+            {
+                return NotFound();
+            }
+            else if (item.IsCompleted)
+            {
+                return BadRequest("Yapılacaklar listesi zaten tamamlanmış.");
+            }
+            item.IsCompleted = true;
+            item.UpdatedAt = DateTime.Now;
+            return Ok("Yapılacaklar listesi tamamlandı.");
+        }
+
+        [HttpPut("incomplete/{id}")]
+        public IActionResult MarkAsIncompleted(int id)
+        {
+            var item = toDoItems.FirstOrDefault(i => i.Id == id);
+            if (item == null)
+            {
+                return NotFound();
+            }
+            else if (!item.IsCompleted)
+            {
+                return BadRequest("Yapılacaklar listesi zaten tamamlanmamış.");
+            }
+            item.IsCompleted = false;
+            item.UpdatedAt = DateTime.Now;
+            return Ok("Yapılacaklar listesi tamamlanmamıştır.");
+        }
+
+
 
 
     }
