@@ -12,8 +12,8 @@ namespace ToDoList.Controllers
             new ToDoItem
             {
                 Id = 1,
-                Title = "Learn ASP.NET Core",
-                Description = "Learn how to build web applications using ASP.NET Core.",
+                Title = "Etüte katıl.",
+                Description = "Bu haftaki etüte katıl.",
                 IsCompleted = false,
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now
@@ -42,7 +42,7 @@ namespace ToDoList.Controllers
         {
             if (toDoItem == null)
             {
-                return BadRequest("Geçersiz ToDoItem verileri");
+                return BadRequest("Geçersiz eleman verileri");
             }
             toDoItem.Id = toDoItems.Count > 0 ? toDoItems.Max(i => i.Id) + 1 : 1;
 
@@ -50,7 +50,7 @@ namespace ToDoList.Controllers
             toDoItem.UpdatedAt = DateTime.Now;
 
             toDoItems.Add(toDoItem);
-            return Ok("Yapılacaklar listesine eklendi");
+            return Ok("Yapılacaklar listesine girilen elemanı eklenmiştir.");
         }
 
         [HttpPut("{id}")]
@@ -69,7 +69,7 @@ namespace ToDoList.Controllers
             item.Description = updatedItem.Description;
             item.IsCompleted = updatedItem.IsCompleted;
             item.UpdatedAt = DateTime.Now;
-            return Ok("Yapılacaklar listesi güncellenmiştir.");
+            return Ok("Yapılacaklar listesi elemanı güncellenmiştir.");
         }
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
@@ -87,6 +87,10 @@ namespace ToDoList.Controllers
         public IActionResult GetCompleted()
         {
             var completedItems = toDoItems.Where(i => i.IsCompleted).ToList();
+            if (!completedItems.Any())
+            {
+                return NotFound("Tamamlanmış eleman bulunmamaktadır.");
+            }
             return Ok(completedItems);
         }
         
@@ -94,6 +98,10 @@ namespace ToDoList.Controllers
         public IActionResult GetIncompleted()
         {
             var incompletedItems = toDoItems.Where(i => !i.IsCompleted).ToList();
+            if (!incompletedItems.Any())
+            {
+                return NotFound("Tamamlanmamış eleman bulunmamaktadır.");
+            }
             return Ok(incompletedItems);
         }
 
@@ -107,11 +115,11 @@ namespace ToDoList.Controllers
             }
             else if (item.IsCompleted)
             {
-                return BadRequest("Yapılacaklar listesi zaten tamamlanmış.");
+                return BadRequest("Seçilen yapılacaklar listesi elemanı zaten tamamlanmış.");
             }
             item.IsCompleted = true;
             item.UpdatedAt = DateTime.Now;
-            return Ok("Yapılacaklar listesi tamamlandı.");
+            return Ok("Yapılacaklar listesi elemanı tamamlandı.");
         }
 
         [HttpPut("incomplete/{id}")]
@@ -122,13 +130,13 @@ namespace ToDoList.Controllers
             {
                 return NotFound();
             }
-            else if (!item.IsCompleted)
+            else if (item.IsCompleted != true)
             {
-                return BadRequest("Yapılacaklar listesi zaten tamamlanmamış.");
+                return BadRequest("Seçilen yapılacaklar listesi elemanı zaten tamamlanmamış.");
             }
             item.IsCompleted = false;
             item.UpdatedAt = DateTime.Now;
-            return Ok("Yapılacaklar listesi tamamlanmamıştır.");
+            return Ok("Yapılacaklar listesi elemanı güncellenmiştir.");
         }
 
 
